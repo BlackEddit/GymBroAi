@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../screens/ninja_timer_screen.dart';
+import '../screens/super_ninja_timer_screen.dart';
 import '../screens/progress_camera_screen.dart';
 
 class QuickStartCard extends StatelessWidget {
@@ -36,14 +36,14 @@ class QuickStartCard extends StatelessWidget {
                   child: _buildQuickAction(
                     context,
                     icon: Icons.timer,
-                    title: 'Timer Ninja 🥷',
-                    subtitle: 'Cronómetro pro',
+                    title: 'Super Timer 🥷',
+                    subtitle: 'Rutinas completas',
                     color: Colors.orange,
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => NinjaTimerScreen(),
+                          builder: (context) => SuperNinjaTimerScreen(),
                         ),
                       );
                     },
