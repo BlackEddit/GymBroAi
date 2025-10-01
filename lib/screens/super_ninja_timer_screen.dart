@@ -9,6 +9,16 @@ class SuperNinjaTimerScreen extends StatefulWidget {
   _SuperNinjaTimerScreenState createState() => _SuperNinjaTimerScreenState();
 }
 
+// 💪 GYM BRO COLOR SCHEME
+class GymBroColors {
+  static const Color neonGreen = Color(0xFF00FF88);
+  static const Color darkPurple = Color(0xFF2D1B69);
+  static const Color deepPurple = Color(0xFF1A0F3A);
+  static const Color matteBlack = Color(0xFF0D0D0D);
+  static const Color charcoal = Color(0xFF1C1C1C);
+  static const Color accent = Color(0xFF7B2CBF);
+}
+
 class _SuperNinjaTimerScreenState extends State<SuperNinjaTimerScreen>
     with TickerProviderStateMixin {
   
@@ -73,7 +83,7 @@ class _SuperNinjaTimerScreenState extends State<SuperNinjaTimerScreen>
       _workoutExercises.add(WorkoutExercise(
         exercise: exercise,
         sets: 3, // Default
-        restBetweenSets: 180, // 3 minutos por defecto
+        restBetweenSets: 90, // 1:30 entre series (gym bro style)
       ));
     });
   }
@@ -241,7 +251,7 @@ class _SuperNinjaTimerScreenState extends State<SuperNinjaTimerScreen>
     if (_currentSet < currentExercise.sets) {
       // Más series del mismo ejercicio - iniciar descanso
       _startRestTimer();
-      _showSnackBar('¡Serie completada! Descanso de ${_formatTime(currentExercise.restBetweenSets)} 😮‍💨');
+      _showSnackBar('💪 SET COMPLETADO! Descanso ${_formatTime(currentExercise.restBetweenSets)} para el siguiente rep');
     } else {
       // Ejercicio completado - pasar al siguiente
       _completeExercise();
@@ -284,7 +294,7 @@ class _SuperNinjaTimerScreenState extends State<SuperNinjaTimerScreen>
     });
     
     HapticFeedback.mediumImpact();
-    _showSnackBar('¡Descanso terminado! Serie $_currentSet 🔥');
+    _showSnackBar('🔥 ¡VAMOS BRO! Set $_currentSet - ¡Dale con todo!');
   }
 
   void _completeExercise() {
@@ -297,10 +307,47 @@ class _SuperNinjaTimerScreenState extends State<SuperNinjaTimerScreen>
       // Workout completado
       _completeWorkout();
     } else {
-      // Siguiente ejercicio
+      // Siguiente ejercicio - descanso de 3 minutos entre ejercicios
       HapticFeedback.heavyImpact();
-      _showNextExerciseDialog();
+      _startExerciseBreak();
     }
+  }
+
+  void _startExerciseBreak() {
+    setState(() {
+      _isActive = true;
+      _isResting = true;
+      _seconds = 180; // 3 minutos entre ejercicios (gym bro style!)
+      _currentPhase = 'exercise_break';
+    });
+    
+    _pulseController.repeat(reverse: true);
+    _showSnackBar('💪 Descanso entre ejercicios - 3 minutos para resetear');
+    
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_seconds > 0) {
+          _seconds--;
+        } else {
+          _completeExerciseBreak();
+        }
+      });
+    });
+  }
+
+  void _completeExerciseBreak() {
+    _timer?.cancel();
+    _pulseController.stop();
+    
+    setState(() {
+      _isActive = false;
+      _isResting = false;
+      _seconds = 0;
+      _currentPhase = 'exercising';
+    });
+    
+    HapticFeedback.heavyImpact();
+    _showNextExerciseDialog();
   }
 
   void _showNextExerciseDialog() {
@@ -455,21 +502,21 @@ class _SuperNinjaTimerScreenState extends State<SuperNinjaTimerScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[900],
+      backgroundColor: GymBroColors.matteBlack,
       appBar: AppBar(
         title: Row(
           children: [
-            Icon(Icons.timer, color: Colors.orange),
+            Icon(Icons.timer, color: GymBroColors.neonGreen),
             SizedBox(width: 8),
-            Text('Super Timer Ninja 🥷', style: TextStyle(color: Colors.white)),
+            Text('GYM BRO TIMER 💪', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ],
         ),
-        backgroundColor: Colors.black,
+        backgroundColor: GymBroColors.deepPurple,
         elevation: 0,
         actions: [
           if (_currentPhase != 'setup')
             IconButton(
-              icon: Icon(Icons.refresh, color: Colors.orange),
+              icon: Icon(Icons.refresh, color: GymBroColors.neonGreen),
               onPressed: _resetWorkout,
             ),
         ],
@@ -503,31 +550,39 @@ class _SuperNinjaTimerScreenState extends State<SuperNinjaTimerScreen>
             padding: EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.orange[600]!, Colors.orange[800]!],
+                colors: [GymBroColors.darkPurple, GymBroColors.deepPurple],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: GymBroColors.neonGreen, width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: GymBroColors.neonGreen.withOpacity(0.3),
+                  blurRadius: 15,
+                  spreadRadius: 2,
+                ),
+              ],
             ),
             child: Row(
               children: [
-                Icon(Icons.fitness_center, color: Colors.white, size: 30),
+                Icon(Icons.fitness_center, color: GymBroColors.neonGreen, size: 30),
                 SizedBox(width: 15),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Crea tu Rutina Ninja',
+                        'GYM BRO SETUP 💪',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 20,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        'Agrega ejercicios y personaliza series',
-                        style: TextStyle(color: Colors.white70),
+                        'Rutina personalizada con timing pro',
+                        style: TextStyle(color: GymBroColors.neonGreen),
                       ),
                     ],
                   ),
@@ -540,9 +595,9 @@ class _SuperNinjaTimerScreenState extends State<SuperNinjaTimerScreen>
           // Rutina actual
           if (_workoutExercises.isNotEmpty) ...[
             Text(
-              'Tu Rutina (${_workoutExercises.length} ejercicios)',
+              'TU RUTINA BRO (${_workoutExercises.length} ejercicios) 🔥',
               style: TextStyle(
-                color: Colors.orange,
+                color: GymBroColors.neonGreen,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -566,11 +621,13 @@ class _SuperNinjaTimerScreenState extends State<SuperNinjaTimerScreen>
               child: ElevatedButton(
                 onPressed: _startWorkout,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
+                  backgroundColor: GymBroColors.neonGreen,
+                  foregroundColor: GymBroColors.matteBlack,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
+                  elevation: 12,
+                  shadowColor: GymBroColors.neonGreen.withOpacity(0.5),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -578,8 +635,8 @@ class _SuperNinjaTimerScreenState extends State<SuperNinjaTimerScreen>
                     Icon(Icons.play_arrow, size: 30),
                     SizedBox(width: 10),
                     Text(
-                      '¡EMPEZAR RUTINA NINJA!',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      '¡LET\'S GO BRO! 💪',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                     ),
                   ],
                 ),
@@ -595,9 +652,16 @@ class _SuperNinjaTimerScreenState extends State<SuperNinjaTimerScreen>
       margin: EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[850],
+        color: GymBroColors.charcoal,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange.withOpacity(0.3)),
+        border: Border.all(color: GymBroColors.accent, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: GymBroColors.accent.withOpacity(0.2),
+            blurRadius: 8,
+            spreadRadius: 1,
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -740,7 +804,7 @@ class _SuperNinjaTimerScreenState extends State<SuperNinjaTimerScreen>
             width: double.infinity,
             height: 8,
             decoration: BoxDecoration(
-              color: Colors.grey[800],
+              color: GymBroColors.charcoal,
               borderRadius: BorderRadius.circular(4),
             ),
             child: FractionallySizedBox(
@@ -748,8 +812,17 @@ class _SuperNinjaTimerScreenState extends State<SuperNinjaTimerScreen>
               widthFactor: progress,
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.orange,
+                  gradient: LinearGradient(
+                    colors: [GymBroColors.neonGreen, GymBroColors.accent],
+                  ),
                   borderRadius: BorderRadius.circular(4),
+                  boxShadow: [
+                    BoxShadow(
+                      color: GymBroColors.neonGreen.withOpacity(0.4),
+                      blurRadius: 8,
+                      spreadRadius: 1,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -773,8 +846,8 @@ class _SuperNinjaTimerScreenState extends State<SuperNinjaTimerScreen>
           ),
           SizedBox(height: 10),
           Text(
-            'Serie $_currentSet de ${currentExercise.sets}',
-            style: TextStyle(color: Colors.orange, fontSize: 18),
+            'SET $_currentSet de ${currentExercise.sets} 🔥',
+            style: TextStyle(color: GymBroColors.neonGreen, fontSize: 18, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 40),
           
@@ -791,15 +864,15 @@ class _SuperNinjaTimerScreenState extends State<SuperNinjaTimerScreen>
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        _isResting ? Colors.blue[600]! : Colors.orange[600]!,
-                        _isResting ? Colors.blue[900]! : Colors.orange[900]!,
+                        _isResting ? GymBroColors.accent : GymBroColors.neonGreen,
+                        _isResting ? GymBroColors.deepPurple : GymBroColors.darkPurple,
                       ],
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: (_isResting ? Colors.blue : Colors.orange).withOpacity(0.4),
-                        blurRadius: 30,
-                        spreadRadius: 10,
+                        color: (_isResting ? GymBroColors.accent : GymBroColors.neonGreen).withOpacity(0.6),
+                        blurRadius: 35,
+                        spreadRadius: 12,
                       ),
                     ],
                   ),
@@ -817,7 +890,9 @@ class _SuperNinjaTimerScreenState extends State<SuperNinjaTimerScreen>
                         ),
                         SizedBox(height: 8),
                         Text(
-                          _isResting ? 'DESCANSANDO 😮‍💨' : _isActive ? 'TRABAJANDO 💪' : 'LISTO 🥷',
+                          _isResting 
+                            ? (_currentPhase == 'exercise_break' ? 'BREAK TIME 😤' : 'REST BRO �') 
+                            : _isActive ? 'WORKING �' : 'READY BRO 💯',
                           style: TextStyle(
                             color: Colors.white70,
                             fontSize: 14,
@@ -842,12 +917,14 @@ class _SuperNinjaTimerScreenState extends State<SuperNinjaTimerScreen>
                   child: ElevatedButton(
                     onPressed: _isActive ? null : _startExerciseTimer,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
+                      backgroundColor: GymBroColors.neonGreen,
+                      foregroundColor: GymBroColors.matteBlack,
                       padding: EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
+                      elevation: 8,
+                      shadowColor: GymBroColors.neonGreen.withOpacity(0.4),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -864,12 +941,14 @@ class _SuperNinjaTimerScreenState extends State<SuperNinjaTimerScreen>
                   child: ElevatedButton(
                     onPressed: _isActive ? _completeSet : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: GymBroColors.accent,
                       foregroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
+                      elevation: 8,
+                      shadowColor: GymBroColors.accent.withOpacity(0.4),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -940,7 +1019,7 @@ class WorkoutExercise {
   WorkoutExercise({
     required this.exercise,
     this.sets = 3,
-    this.restBetweenSets = 180, // 3 minutos por defecto
+    this.restBetweenSets = 90, // 1:30 entre series (gym bro timing)
   });
 }
 
