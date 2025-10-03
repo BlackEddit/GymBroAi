@@ -1,0 +1,86 @@
+name: 🥷 Build GymAI Ninja APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: ☕ Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+        
+    - name: 🔧 Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.13.9'
+        channel: 'stable'
+        
+    - name: 📦 Get dependencies
+      run: flutter pub get
+      
+    - name: 🔍 Analyze code
+      run: flutter analyze
+      
+    - name: 🏗️ Build APK
+      run: flutter build apk --release
+      
+    - name: 🏗️ Build Debug APK
+      run: flutter build apk --debug
+      
+    - name: 📄 Get version
+      id: version
+      run: |
+        VERSION=$(grep 'version:' pubspec.yaml | cut -d ' ' -f 2 | tr -d '\r')
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+        
+    - name: 📱 Upload Release APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: gymAI-ninja-v${{ steps.version.outputs.VERSION }}-release
+        path: build/app/outputs/flutter-apk/app-release.apk
+        
+    - name: 🐛 Upload Debug APK  
+      uses: actions/upload-artifact@v4
+      with:
+        name: gymAI-ninja-v${{ steps.version.outputs.VERSION }}-debug-${{ steps.version.outputs.SHORT_SHA }}
+        path: build/app/outputs/flutter-apk/app-debug.apk
+
+    - name: 🚀 Create Release (on tag)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          build/app/outputs/flutter-apk/app-release.apk
+          build/app/outputs/flutter-apk/app-debug.apk
+        body: |
+          🥷 **GymAI Timer Ninja v${{ steps.version.outputs.VERSION }}**
+          
+          ## 🚀 Novedades
+          - Timer Ninja con cronómetro avanzado ⏱️
+          - Registro automático de ejercicios 📊  
+          - Cámara para fotos de progreso 📸
+          - Base de datos de 9+ ejercicios 💪
+          
+          ## 📱 Instalación
+          1. Descarga el APK de release
+          2. Habilita "Apps de origen desconocido"  
+          3. ¡Instala y entrena como ninja! 🔥
+          
+          ---
+          Commit: ${{ github.sha }}
+        name: GymAI Ninja v${{ steps.version.outputs.VERSION }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

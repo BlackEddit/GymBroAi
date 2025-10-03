@@ -1,0 +1,57 @@
+name: gym_ai
+description: A Flutter app for gym equipment recognition and workout assistance using computer vision.
+
+publish_to: 'none'
+
+version: 1.0.1+2
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # UI and Navigation
+  cupertino_icons: ^1.0.6
+  
+  # Camera and Computer Vision 
+  camera: ^0.10.5+5
+  image: ^3.3.0
+  
+  # ML Kit for object detection (commented for demo)
+  # google_mlkit_object_detection: ^0.10.0
+  
+  # Database
+  sqflite: ^2.3.0
+  path: ^1.8.3
+  
+  # State Management
+  provider: ^6.0.5
+  
+  # Storage and Files
+  path_provider: ^2.1.1
+  shared_preferences: ^2.2.2
+  
+  # Permissions
+  permission_handler: ^11.0.1
+  
+  # HTTP requests
+  http: ^1.1.0
+  
+  # JSON handling
+  json_annotation: ^4.8.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  build_runner: ^2.4.7
+  json_serializable: ^6.7.1
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/models/
